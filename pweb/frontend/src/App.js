@@ -29,6 +29,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
+
         <h1 className="text-xl font-bold mb-4">Todo List</h1>
         <div className="mb-4">
           <input
@@ -51,7 +52,7 @@ const App = () => {
               <span>{todo.task}</span>
               <button
                 onClick={() => deleteTodo(todo._id)}
-                className="text-red-500"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200"
               >
                 Delete
               </button>
