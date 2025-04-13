@@ -1,13 +1,8 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const { mongoose } = require('mongoose');
+const { Handler } = require('@netlify/functions');
 const dotenv = require('dotenv');
 
 dotenv.config();
-
-const app = express();
-app.use(express.json());
-app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -23,49 +18,102 @@ const TodoSchema = new mongoose.Schema({
 
 const Todo = mongoose.model('Todo', TodoSchema);
 
-// Routes to handle to-do items
-app.get('/todos', async (req, res) => {
-  try {
-    // Fetch all to-dos
-    const todos = await Todo.find().sort({ dueDate: 1 });
-    res.json(todos);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching todos', error });
-  }
-});
+// Define a handler for the to-do API
+exports.handler = async function (event, context) {
+  const { httpMethod, path, body, queryStringParameters } = event;
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS',
+  };
 
-app.post('/todos', async (req, res) => {
-  try {
-    const { task, dueDate } = req.body;
-    if (!task || !dueDate) {
-      return res.status(400).json({ message: 'Task and due date are required' });
+  // Handle preflight CORS request
+  if (httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: 'Preflight OK',
+    };
+  }
+
+  // Handle GET request to fetch all todos
+  if (httpMethod === 'GET' && path === '/todos') {
+    try {
+      const todos = await Todo.find().sort({ dueDate: 1 });
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(todos),
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ message: 'Error fetching todos', error }),
+      };
     }
-
-    // Convert the dueDate to UTC before saving it
-    const dueDateUTC = new Date(dueDate).toISOString();  // Convert to UTC
-
-    const newTodo = new Todo({
-      task,
-      completed: false,
-      dueDate: dueDateUTC,  // Save UTC date in the database
-    });
-
-    await newTodo.save();
-    res.json(newTodo);
-  } catch (error) {
-    res.status(500).json({ message: 'Error saving todo', error });
   }
-});
 
-app.delete('/todos/:id', async (req, res) => {
-  try {
-    await Todo.findByIdAndDelete(req.params.id);  // Delete the todo
-    res.json({ message: 'Todo deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting todo', error });
+  // Handle POST request to create a new todo
+  if (httpMethod === 'POST' && path === '/todos') {
+    try {
+      const { task, dueDate } = JSON.parse(body);
+      if (!task || !dueDate) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: 'Task and due date are required' }),
+        };
+      }
+
+      const dueDateUTC = new Date(dueDate).toISOString();  // Convert to UTC
+
+      const newTodo = new Todo({
+        task,
+        completed: false,
+        dueDate: dueDateUTC,
+      });
+
+      await newTodo.save();
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(newTodo),
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ message: 'Error saving todo', error }),
+      };
+    }
   }
-});
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
+  // Handle DELETE request to remove a todo
+  if (httpMethod === 'DELETE' && path.startsWith('/todos/')) {
+    const todoId = path.split('/')[2];  // Extract todo ID from URL
+    try {
+      await Todo.findByIdAndDelete(todoId);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: 'Todo deleted' }),
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ message: 'Error deleting todo', error }),
+      };
+    }
+  }
+
+  // Return error for unsupported HTTP methods
+  return {
+    statusCode: 405,
+    headers,
+    body: JSON.stringify({ message: 'Method Not Allowed' }),
+  };
+};
