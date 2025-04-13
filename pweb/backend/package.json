@@ -1,11 +1,11 @@
 {
-    "name": "vercel-backend",
+    "name": "netlify-backend",  
     "version": "1.0.0",
     "description": "Backend API for Todo app deployed on Netlify",
-    "main": "index.js",
+    "main": "server.js",  
     "scripts": {
-      "start": "netlify dev",  // Use Netlify's CLI for local testing
-      "build": "echo 'No build step required'"
+      "start": "node server.js", 
+      "build": "echo 'No build step required'"  
     },
     "dependencies": {
       "express": "^4.17.1",

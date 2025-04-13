@@ -1,0 +1,32 @@
+[build]
+  # Directory where Netlify should look for the build output
+  publish = "build"
+  
+  # Directory where Netlify should look for serverless functions (backend)
+  functions = "netlify-functions"
+
+  # Command to build the site
+  command = "npm run build"
+
+[dev]
+  # Enable live reload during development
+  functions = "netlify-functions"
+  publish = "build"
+
+[context.production.environment]
+  # Production-specific environment variables
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  # Deploy preview-specific environment variables (optional)
+  NODE_ENV = "development"
+
+[[plugins]]
+  # Optional plugin for performance optimizations (you can use this if needed)
+  package = "@netlify/plugin-nextjs"
+
+# This section defines your build environment variables, such as API keys, secrets, etc.
+[build.environment]
+  MONGODB_URI = "your_mongodb_connection_string_here"
+  JWT_SECRET = "your_jwt_secret_here"
+  # Add more environment variables as needed
