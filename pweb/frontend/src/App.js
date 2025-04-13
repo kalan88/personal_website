@@ -10,11 +10,23 @@ const App = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axios.get('https://personal-website-6pxg.onrender.com/todos'); // Correct endpoint
+        const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
+        if (!token) {
+          // If no token, return early
+          console.log('No token found, cannot fetch todos');
+          return;
+        }
+
+        const response = await axios.get('https://personal-website-6pxg.onrender.com/todos', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
+          },
+        });
+        
         const sortedTodos = response.data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         setTodos(sortedTodos);
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching todos', error);
       }
     };
 
@@ -25,14 +37,29 @@ const App = () => {
   const addTodo = () => {
     if (!task.trim() || !dueDate) return;
 
-    axios.post('https://personal-website-6pxg.onrender.com/todos', { task, dueDate }) // Correct endpoint
-      .then(response => {
-        setTodos(prevTodos => {
+    const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
+    if (!token) {
+      console.log('No token found, cannot add todo');
+      return;
+    }
+
+    axios
+      .post(
+        'https://personal-website-6pxg.onrender.com/todos',
+        { task, dueDate },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
+          },
+        }
+      )
+      .then((response) => {
+        setTodos((prevTodos) => {
           const updatedTodos = [...prevTodos, response.data];
           return updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         });
       })
-      .catch(error => console.error(error));
+      .catch((error) => console.error('Error adding todo', error));
 
     setTask('');
     setDueDate('');
@@ -40,13 +67,24 @@ const App = () => {
 
   // Delete a todo
   const deleteTodo = (id) => {
-    axios.delete(`https://personal-website-6pxg.onrender.com/todos/${id}`) // Correct endpoint
+    const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
+    if (!token) {
+      console.log('No token found, cannot delete todo');
+      return;
+    }
+
+    axios
+      .delete(`https://personal-website-6pxg.onrender.com/todos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
+        },
+      })
       .then(() => {
-        const updatedTodos = todos.filter(todo => todo._id !== id);
+        const updatedTodos = todos.filter((todo) => todo._id !== id);
         updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         setTodos(updatedTodos);
       })
-      .catch(error => console.error(error));
+      .catch((error) => console.error('Error deleting todo', error));
   };
 
   return (
@@ -85,7 +123,7 @@ const App = () => {
         <h2 className="text-2xl font-semibold mb-4 text-amber-200 font-serif">To-do List</h2>
 
         <ul className="space-y-4">
-          {todos.map(todo => (
+          {todos.map((todo) => (
             <li
               key={todo._id}
               className="bg-gray-800 p-4 rounded-lg flex items-center justify-between hover:bg-opacity-80 transition-all"
