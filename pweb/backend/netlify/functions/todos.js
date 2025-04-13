@@ -59,7 +59,7 @@ exports.handler = async function (event, context) {
   
 
   // Handle POST request to create a new todo
-  if (httpMethod === 'POST' && path === '/todos') {
+  if (httpMethod === 'POST' && path === '/.netlify/functions/todos') {
     try {
       const { task, dueDate } = JSON.parse(body);
       if (!task || !dueDate) {
@@ -95,7 +95,7 @@ exports.handler = async function (event, context) {
   }
 
   // Handle DELETE request to remove a todo
-  if (httpMethod === 'DELETE' && path.startsWith('/todos/')) {
+  if (httpMethod === 'DELETE' && path.startsWith('/.netlify/functions/todos/')) {
     const todoId = path.split('/')[2];  // Extract todo ID from URL
     if (!todoId) {
       return {
