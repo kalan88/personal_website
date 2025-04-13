@@ -152,7 +152,7 @@ const App = () => {
               <div className="flex space-x-4 items-center">
                 <span className="text-xl text-amber-300">{todo.task}</span>
                 <span className="ml-3 text-gray-400 text-sm">
-                  Due: {todo.dueDate}
+                  Due: {formatDueDate(todo.dueDate)}
                 </span>
               </div>
 
@@ -169,5 +169,11 @@ const App = () => {
     </div>
   );
 };
+
+const formatDueDate = (date) => {
+  const localDate = new Date(date);  // Convert to Date object, but don't change the underlying date
+  return localDate.toLocaleDateString();  // Format as a local date string
+};
+
 
 export default App;
