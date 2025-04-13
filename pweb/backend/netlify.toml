@@ -2,10 +2,10 @@
   base = "pweb/backend"
   command = "echo 'No build step required'"
   publish = "."
-  functions = "netlify/functions"  # Ensure the correct functions folder is specified
+  functions = "netlify/functions"  # Ensure this path matches your folder structure
 
 [dev]
-  functions = "netlify/functions"  # Same for dev functions folder
+  functions = "netlify/functions"
   publish = "build"
 
 [context.production.environment]

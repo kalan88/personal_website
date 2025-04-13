@@ -37,16 +37,18 @@ exports.handler = async function (event, context) {
     };
   }
 
-  // Handle GET request to fetch all todos
-  if (httpMethod === 'GET' && path === '/todos') {
+  if (httpMethod === 'GET' && path === '/.netlify/functions/todos') {
+    console.log("Received GET request for todos");
     try {
       const todos = await Todo.find().sort({ dueDate: 1 });
+      console.log("Fetched todos:", todos);
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify(todos),
       };
     } catch (error) {
+      console.error('Error fetching todos:', error);
       return {
         statusCode: 500,
         headers,
@@ -54,6 +56,7 @@ exports.handler = async function (event, context) {
       };
     }
   }
+  
 
   // Handle POST request to create a new todo
   if (httpMethod === 'POST' && path === '/todos') {
