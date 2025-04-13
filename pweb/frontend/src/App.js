@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import jwt from 'jwt-decode'; // Import jwt-decode here
 
 const App = () => {
   const [todos, setTodos] = useState([]);
@@ -10,7 +11,7 @@ const App = () => {
 
   // Function to check if the token is expired
   const isTokenExpired = (token) => {
-    const decoded = jwt.decode(token);
+    const decoded = jwt(token);
     if (decoded && decoded.exp) {
       return decoded.exp * 1000 < Date.now(); // Check if token is expired
     }
