@@ -9,7 +9,7 @@ const App = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/todos');
+        const response = await axios.get('https://personal-website-6pxg.onrender.com');
         const sortedTodos = response.data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         setTodos(sortedTodos);
       } catch (error) {
@@ -23,7 +23,7 @@ const App = () => {
   const addTodo = () => {
     if (!task.trim() || !dueDate) return;
 
-    axios.post('http://localhost:5000/todos', { task, dueDate })
+    axios.post('https://personal-website-6pxg.onrender.com', { task, dueDate })
       .then(response => {
         setTodos(prevTodos => {
           const updatedTodos = [...prevTodos, response.data];
@@ -37,7 +37,7 @@ const App = () => {
   };
 
   const deleteTodo = (id) => {
-    axios.delete(`http://localhost:5000/todos/${id}`)
+    axios.delete(`https://personal-website-6pxg.onrender.com/todos/${id}`)
       .then(() => {
         const updatedTodos = todos.filter(todo => todo._id !== id);
         updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
