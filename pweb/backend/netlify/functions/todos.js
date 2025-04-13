@@ -1,7 +1,7 @@
-const connectToDatabase = require('./mongo.js'); // adjust path if needed
+const connectToDatabase = require('./mongo.js');
 const jwt = require('jsonwebtoken');
 
-const allowedOrigins = ['https://kalan88.netlify.app']; 
+const allowedOrigins = ['https://kalan88.netlify.app'];
 
 module.exports.handler = async (event) => {
   const origin = event.headers.origin;
@@ -25,7 +25,7 @@ module.exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   };
 
-  // 🔐 JWT authentication check
+  // JWT authentication check
   const token = event.headers.authorization?.split(' ')[1];
   if (!token) {
     return {
