@@ -1,104 +1,71 @@
-const connectToDatabase = require('./mongo.js');
-const jwt = require('jsonwebtoken');
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
 
-const allowedOrigins = ['https://kalan88.netlify.app'];
+dotenv.config();
 
-module.exports.handler = async (event) => {
-  const origin = event.headers.origin;
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-  // Handle preflight OPTIONS request
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-      },
-      body: 'Preflight OK',
-    };
-  }
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log(err));
 
-  const headers = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  };
+// Create a Todo Schema
+const TodoSchema = new mongoose.Schema({
+  task: String,
+  completed: Boolean,
+  dueDate: { type: Date, required: true },
+});
 
-  // JWT authentication check
-  const token = event.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return {
-      statusCode: 401,
-      headers,
-      body: JSON.stringify({ error: 'Missing Authorization header' }),
-    };
-  }
+const Todo = mongoose.model('Todo', TodoSchema);
 
-  let userId;
+// Routes to handle to-do items
+app.get('/todos', async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    userId = decoded.userId;
+    // Fetch all to-dos
+    const todos = await Todo.find().sort({ dueDate: 1 });
+    res.json(todos);
   } catch (error) {
-    return {
-      statusCode: 401,
-      headers,
-      body: JSON.stringify({ error: 'Invalid token' }),
-    };
+    res.status(500).json({ message: 'Error fetching todos', error });
   }
+});
 
+app.post('/todos', async (req, res) => {
   try {
-    const db = await connectToDatabase();
-    const collection = db.collection('todos');
-
-    if (event.httpMethod === 'GET') {
-      const todos = await collection.find({ userId }).toArray();
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(todos),
-      };
+    const { task, dueDate } = req.body;
+    if (!task || !dueDate) {
+      return res.status(400).json({ message: 'Task and due date are required' });
     }
 
-    if (event.httpMethod === 'POST') {
-      const { task, dueDate } = JSON.parse(event.body);
-      const result = await collection.insertOne({ task, dueDate, userId });
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(result.ops[0]),
-      };
-    }
+    // Convert the dueDate to UTC before saving it
+    const dueDateUTC = new Date(dueDate).toISOString();  // Convert to UTC
 
-    if (event.httpMethod === 'DELETE') {
-      const id = event.queryStringParameters?.id;
-      if (!id) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ error: 'Missing ID' }),
-        };
-      }
+    const newTodo = new Todo({
+      task,
+      completed: false,
+      dueDate: dueDateUTC,  // Save UTC date in the database
+    });
 
-      const { ObjectId } = require('mongodb');
-      await collection.deleteOne({ _id: new ObjectId(id), userId });
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ message: 'Deleted' }),
-      };
-    }
-
-    return {
-      statusCode: 405,
-      headers,
-      body: 'Method Not Allowed',
-    };
+    await newTodo.save();
+    res.json(newTodo);
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: error.message }),
-    };
+    res.status(500).json({ message: 'Error saving todo', error });
   }
-};
+});
+
+app.delete('/todos/:id', async (req, res) => {
+  try {
+    await Todo.findByIdAndDelete(req.params.id);  // Delete the todo
+    res.json({ message: 'Todo deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting todo', error });
+  }
+});
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});

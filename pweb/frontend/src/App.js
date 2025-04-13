@@ -5,7 +5,6 @@ const App = () => {
   const [todos, setTodos] = useState([]);
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [token] = useState(localStorage.getItem('token')); // Get token from localStorage
 
   const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions';
 
@@ -13,11 +12,7 @@ const App = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/todos`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(`${BASE_URL}/todos`);
         const sortedTodos = response.data.sort(
           (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
         );
@@ -27,10 +22,8 @@ const App = () => {
       }
     };
 
-    if (token) {
-      fetchTodos();
-    }
-  }, [token]); // Fetch todos whenever token changes
+    fetchTodos();
+  }, []); // Fetch todos once on component mount
 
   const addTodo = () => {
     if (!task.trim() || !dueDate) return;
@@ -40,8 +33,7 @@ const App = () => {
     axios
       .post(
         `${BASE_URL}/todos`,
-        { task, dueDate: dueDateISO },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { task, dueDate: dueDateISO }
       )
       .then((response) => {
         setTodos((prevTodos) => {
@@ -59,9 +51,7 @@ const App = () => {
 
   const deleteTodo = (id) => {
     axios
-      .delete(`${BASE_URL}/todos?id=${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .delete(`${BASE_URL}/todos?id=${id}`)
       .then(() => {
         const updatedTodos = todos.filter((todo) => todo._id !== id);
         updatedTodos.sort(
