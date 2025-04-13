@@ -1,4 +1,4 @@
-const { mongoose } = require('mongoose');
+const mongoose = require('mongoose');
 const { Handler } = require('@netlify/functions');
 const dotenv = require('dotenv');
 
