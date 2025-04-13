@@ -95,39 +95,42 @@ exports.handler = async function (event, context) {
   }
 
   // Handle DELETE request to remove a todo
-  if (httpMethod === 'DELETE' && path.startsWith('/.netlify/functions/todos/')) {
-    const todoId = path.split('/')[2];  // Extract todo ID from URL
-    if (!todoId) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ message: 'Todo ID is required' }),
-      };
-    }
+if (httpMethod === 'DELETE' && path.startsWith('/.netlify/functions/todos/')) {
+  // Extract todoId from the URL path
+  const todoId = path.split('/').pop();  // This will give you the last part after 'todos/'
 
-    try {
-      const deletedTodo = await Todo.findByIdAndDelete(todoId);
-      if (!deletedTodo) {
-        return {
-          statusCode: 404,
-          headers,
-          body: JSON.stringify({ message: 'Todo not found' }),
-        };
-      }
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ message: 'Todo deleted' }),
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ message: 'Error deleting todo', error }),
-      };
-    }
+  if (!todoId) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ message: 'Todo ID is required' }),
+    };
   }
+
+  try {
+    const deletedTodo = await Todo.findByIdAndDelete(todoId);
+    if (!deletedTodo) {
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ message: 'Todo not found' }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ message: 'Todo deleted' }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ message: 'Error deleting todo', error }),
+    };
+  }
+}
+
 
   // Return error for unsupported HTTP methods
   return {
