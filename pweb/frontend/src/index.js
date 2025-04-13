@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import WebVulture from './pages/WebVulture'
 import About from './pages/About'
 
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
