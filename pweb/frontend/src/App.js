@@ -58,10 +58,13 @@ const App = () => {
       return;
     }
 
+    // Convert the dueDate to ISO format before sending to backend (UTC)
+    const dueDateISO = new Date(dueDate).toISOString();  // Convert to UTC before sending to the backend
+
     axios
       .post(
         `${BASE_URL}/todos`,
-        { task, dueDate },
+        { task, dueDate: dueDateISO },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((response) => {
@@ -99,10 +102,9 @@ const App = () => {
       .catch((error) => console.error('Error deleting todo', error));
   };
 
-  // Function to convert UTC to local time zone
   const formatDueDate = (date) => {
-    const localDate = new Date(date);
-    return localDate.toLocaleDateString(); // Adjust to your preferred date format
+    const localDate = new Date(date);  // Convert UTC date to local time
+    return localDate.toLocaleDateString();  // Adjust to local time zone and return the formatted date string
   };
 
   return (
@@ -144,19 +146,20 @@ const App = () => {
           {todos.map((todo) => (
             <li
               key={todo._id}
-              className="bg-gray-800 p-4 rounded-lg flex items-center justify-between hover:bg-opacity-80 transition-all"
+              className="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center"
             >
-              <div>
-                <span className="text-amber-400 font-semibold">{todo.task}</span>
-                {todo.dueDate && (
-                  <span className="ml-3 text-gray-400 text-sm">Due: {formatDueDate(todo.dueDate)}</span>
-                )}
+              <div className="flex space-x-4 items-center">
+                <span className="text-xl text-amber-300">{todo.task}</span>
+                <span className="ml-3 text-gray-400 text-sm">
+                  Due: {formatDueDate(todo.dueDate)}
+                </span>
               </div>
+
               <button
                 onClick={() => deleteTodo(todo._id)}
-                className="bg-amber-400 hover:bg-amber-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow transition duration-200"
+                className="text-red-500 text-xl hover:text-red-400"
               >
-                Completed
+                Delete
               </button>
             </li>
           ))}

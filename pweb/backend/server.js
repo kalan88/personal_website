@@ -61,12 +61,16 @@ app.post('/todos', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Task and due date are required' });
     }
 
+    // Convert the dueDate to UTC before saving it
+    const dueDateUTC = new Date(dueDate).toISOString();  // Convert to UTC
+
     const newTodo = new Todo({
       task,
       completed: false,
-      dueDate,
+      dueDate: dueDateUTC,  // Save UTC date in the database
       userId: req.user.userId,  // Associate with the unique user ID
     });
+
     await newTodo.save();
     res.json(newTodo);
   } catch (error) {
