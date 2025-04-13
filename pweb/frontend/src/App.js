@@ -99,6 +99,12 @@ const App = () => {
       .catch((error) => console.error('Error deleting todo', error));
   };
 
+  // Function to convert UTC to local time zone
+  const formatDueDate = (date) => {
+    const localDate = new Date(date);
+    return localDate.toLocaleDateString(); // Adjust to your preferred date format
+  };
+
   return (
     <div className="min-h-screen bg-gray-800 text-amber-400 flex items-start justify-center space-x-8 p-8">
       {/* Input Section */}
@@ -143,7 +149,7 @@ const App = () => {
               <div>
                 <span className="text-amber-400 font-semibold">{todo.task}</span>
                 {todo.dueDate && (
-                  <span className="ml-3 text-gray-400 text-sm">Due: {new Date(todo.dueDate).toLocaleDateString()}</span>
+                  <span className="ml-3 text-gray-400 text-sm">Due: {formatDueDate(todo.dueDate)}</span>
                 )}
               </div>
               <button
