@@ -151,7 +151,7 @@ const App = () => {
             >
               <div className="flex space-x-4 items-center">
                 <span className="text-xl text-amber-300">{todo.task}</span>
-                <span className="ml-3 text-gray-400 text-sm">
+                <span className="ml-3 text-gray-400 text-sm font-serif">
                   Due: {formatDueDate(todo.dueDate)} {/* Display local time */}
                 </span>
               </div>
@@ -160,7 +160,7 @@ const App = () => {
                 onClick={() => deleteTodo(todo._id)}
                 className="w-15 bg-amber-400 text-gray-800 p-2 rounded font-bold font-serif hover:bg-amber-500 transition-all"
               >
-                Delete
+                Completed
               </button>
             </li>
           ))}
