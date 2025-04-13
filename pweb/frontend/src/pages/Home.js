@@ -19,10 +19,7 @@ const Home = () => {
             title="WebVulture: "
             description="A web-based UI for SQLMap that simplifies SQL injection testing for security professionals and researchers. Users can customize attack parameters and view results directly in the browser."
           />
-          <ProjectCard
-            title=" - : "
-            description="-."
-          />
+        
         </div>
       </div>
     </div>
