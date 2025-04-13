@@ -5,7 +5,7 @@ const App = () => {
   const [todos, setTodos] = useState([]);
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [token, setToken] = useState(localStorage.getItem('token')); // Get token from localStorage
+  const [token] = useState(localStorage.getItem('token')); // Get token from localStorage
 
   const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions';
 
