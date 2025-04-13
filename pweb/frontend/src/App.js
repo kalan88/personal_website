@@ -6,10 +6,11 @@ const App = () => {
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
 
+  // Fetch todos on component mount
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axios.get('https://personal-website-6pxg.onrender.com');
+        const response = await axios.get('https://personal-website-6pxg.onrender.com/todos'); // Correct endpoint
         const sortedTodos = response.data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         setTodos(sortedTodos);
       } catch (error) {
@@ -20,10 +21,11 @@ const App = () => {
     fetchTodos();
   }, []);
 
+  // Add new todo
   const addTodo = () => {
     if (!task.trim() || !dueDate) return;
 
-    axios.post('https://personal-website-6pxg.onrender.com', { task, dueDate })
+    axios.post('https://personal-website-6pxg.onrender.com/todos', { task, dueDate }) // Correct endpoint
       .then(response => {
         setTodos(prevTodos => {
           const updatedTodos = [...prevTodos, response.data];
@@ -36,8 +38,9 @@ const App = () => {
     setDueDate('');
   };
 
+  // Delete a todo
   const deleteTodo = (id) => {
-    axios.delete(`https://personal-website-6pxg.onrender.com/todos/${id}`)
+    axios.delete(`https://personal-website-6pxg.onrender.com/todos/${id}`) // Correct endpoint
       .then(() => {
         const updatedTodos = todos.filter(todo => todo._id !== id);
         updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
