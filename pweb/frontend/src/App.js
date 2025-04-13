@@ -172,13 +172,17 @@ const App = () => {
 
 const formatDueDate = (date) => {
   const localDate = new Date(date);  // Create Date object from the UTC string
-  
-  // Adjust for local timezone manually
-  const year = localDate.getUTCFullYear();
-  const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');  // Months are 0-indexed
-  const day = String(localDate.getUTCDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;  // Format to 'YYYY-MM-DD'
+
+  // Add one day to the date to compensate for the time zone shift
+  localDate.setDate(localDate.getDate() + 1);
+
+  // Format the date as 'YYYY-MM-DD'
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');  // Months are 0-indexed
+  const day = String(localDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 };
+
 
 export default App;
