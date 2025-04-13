@@ -1,0 +1,9 @@
+[build]
+  base = "pweb/frontend"  # The directory where your frontend code is located
+  publish = "build"       # The directory where the built files are stored after running the build command
+  command = "npm run build"  # The command to build your frontend project
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
