@@ -1,3 +1,4 @@
+
 [build]
   base = "pweb/backend"  
   command = "echo 'No build step required'"  
@@ -5,7 +6,7 @@
 
 [dev]
   # Enable live reload during development
-  functions = "netlify-functions"
+  functions = "pweb/backend/.netlify/functions"
   publish = "build"
 
 [context.production.environment]
