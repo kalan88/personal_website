@@ -6,7 +6,7 @@ const App = () => {
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
 
-  const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions'; // Updated base URL
+  const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions'; // Update to match your Netlify deployment
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -58,8 +58,7 @@ const App = () => {
       return;
     }
 
-    // Convert the dueDate to ISO format before sending to backend (UTC)
-    const dueDateISO = new Date(dueDate).toISOString();  // Convert to UTC before sending to the backend
+    const dueDateISO = new Date(dueDate).toISOString();
 
     axios
       .post(
@@ -88,8 +87,9 @@ const App = () => {
       return;
     }
 
+    // ✅ Use query parameter instead of path param
     axios
-      .delete(`${BASE_URL}/todos/${id}`, {
+      .delete(`${BASE_URL}/todos?id=${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
@@ -103,8 +103,7 @@ const App = () => {
   };
 
   const formatDueDate = (date) => {
-    // This keeps the date in UTC and just returns the date in ISO format
-    return new Date(date).toISOString().slice(0, 10);  // "YYYY-MM-DD" format
+    return new Date(date).toISOString().slice(0, 10);
   };
 
   return (
@@ -151,7 +150,7 @@ const App = () => {
               <div className="flex space-x-4 items-center">
                 <span className="text-xl text-amber-300 font-serif">{todo.task}</span>
                 <span className="ml-3 text-gray-400 text-sm font-serif">
-                  Due: {formatDueDate(todo.dueDate)} {/* Display local time */}
+                  Due: {formatDueDate(todo.dueDate)}
                 </span>
               </div>
 
