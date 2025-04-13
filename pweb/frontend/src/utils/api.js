@@ -1,4 +1,4 @@
-const API_URL = 'https://personal-website-6pxg.onrender.com/todos';
+const API_URL = 'https://kalan88backend.netlify.app/.netlify/functions/todos';
 
 export const getTodos = async () => {
   const response = await fetch(API_URL);
