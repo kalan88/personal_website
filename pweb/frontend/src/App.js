@@ -8,27 +8,36 @@ const App = () => {
 
   const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions'; // Update to match your Netlify deployment
 
+  // Function to check if the token is expired
+  const isTokenExpired = (token) => {
+    const decoded = jwt.decode(token);
+    if (decoded && decoded.exp) {
+      return decoded.exp * 1000 < Date.now(); // Check if token is expired
+    }
+    return true;
+  };
+
+  // Initialize session with token
   useEffect(() => {
     const initializeSession = async () => {
       let token = localStorage.getItem('jwtToken');
 
-      if (!token) {
+      if (token && !isTokenExpired(token)) {
+        fetchTodos(token);
+      } else {
         try {
           const response = await axios.get(`${BASE_URL}/new-session`);
           token = response.data.token;
           if (token) {
             localStorage.setItem('jwtToken', token);
+            fetchTodos(token);
           } else {
             console.error('Token missing from /new-session response');
-            return;
           }
         } catch (error) {
           console.error('Error creating session:', error);
-          return;
         }
       }
-
-      fetchTodos(token);
     };
 
     initializeSession();
@@ -87,7 +96,6 @@ const App = () => {
       return;
     }
 
-    // ✅ Use query parameter instead of path param
     axios
       .delete(`${BASE_URL}/todos?id=${id}`, {
         headers: { Authorization: `Bearer ${token}` },
