@@ -118,7 +118,7 @@ const App = () => {
           type="text"
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          className="w-full mb-4 p-2 border bg-gray-800 border-gray-900 rounded text-amber-200 placeholder-amber-300  
+          className="w-full mb-4 p-2 border bg-gray-800 border-gray-900 rounded text-amber-200 placeholder-amber-200  
             focus:outline-none focus:ring-0 focus:border-amber-400"
           placeholder="Enter a task"
         />
