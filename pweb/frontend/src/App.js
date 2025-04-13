@@ -58,7 +58,7 @@ const App = () => {
       return;
     }
 
-    // Convert the dueDate to UTC before sending to backend (to avoid time zone discrepancies)
+    // Convert the dueDate to ISO format before sending to backend (UTC)
     const dueDateISO = new Date(dueDate).toISOString();  // Convert to UTC before sending to the backend
 
     axios
@@ -102,8 +102,9 @@ const App = () => {
       .catch((error) => console.error('Error deleting todo', error));
   };
 
+  // Adjust the date to the local time zone
   const formatDueDate = (date) => {
-    const localDate = new Date(date);  // Convert UTC date to local time
+    const localDate = new Date(date);  // Convert the UTC date to local time
     return localDate.toLocaleDateString();  // Adjust to local time zone and return the formatted date string
   };
 
