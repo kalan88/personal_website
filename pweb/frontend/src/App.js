@@ -102,7 +102,7 @@ const App = () => {
       .catch((error) => console.error('Error deleting todo', error));
   };
 
-  // Adjust the date to the local time zone
+  // Adjust the date to the local time zone for display
   const formatDueDate = (date) => {
     const localDate = new Date(date);  // Convert the UTC date to local time
     return localDate.toLocaleDateString();  // Adjust to local time zone and return the formatted date string
@@ -152,7 +152,7 @@ const App = () => {
               <div className="flex space-x-4 items-center">
                 <span className="text-xl text-amber-300">{todo.task}</span>
                 <span className="ml-3 text-gray-400 text-sm">
-                  Due: {formatDueDate(todo.dueDate)}
+                  Due: {formatDueDate(todo.dueDate)} {/* Display local time */}
                 </span>
               </div>
 
@@ -169,21 +169,5 @@ const App = () => {
     </div>
   );
 };
-
-const formatDueDate = (date) => {
-  const localDate = new Date(date);  // Convert UTC string to Date object
-
-  // Set the time to 12:00 PM (noon) UTC
-  localDate.setUTCHours(12, 0, 0, 0);  // Set hour to 12, minutes, seconds, and milliseconds to 0
-
-  const year = localDate.getUTCFullYear();  // Get the UTC year
-  const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');  // Get the UTC month (0-indexed)
-  const day = String(localDate.getUTCDate() + 10).padStart(2, '0');  // Get the UTC day
-
-  return `${year}-${month}-${day}`;  // Format the date as 'YYYY-MM-DD'
-};
-
-
-
 
 export default App;
