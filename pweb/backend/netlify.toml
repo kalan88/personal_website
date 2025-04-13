@@ -1,20 +1,16 @@
-
 [build]
-  base = "pweb/backend"  
-  command = "echo 'No build step required'"  
-  publish = "."  
+  base = "pweb/backend"
+  command = "echo 'No build step required'"
+  publish = "."
+  functions = "netlify/functions"  # Ensure the correct functions folder is specified
 
 [dev]
-  # Enable live reload during development
-  functions = "pweb/backend/.netlify/functions"
+  functions = "netlify/functions"  # Same for dev functions folder
   publish = "build"
 
 [context.production.environment]
-  # Production-specific environment variables
   NODE_ENV = "production"
 
-# This section defines your build environment variables, such as API keys, secrets, etc.
 [build.environment]
   MONGODB_URI = "your_mongodb_connection_string_here"
   JWT_SECRET = "your_jwt_secret_here"
-  # Add more environment variables as needed
