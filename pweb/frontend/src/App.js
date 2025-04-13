@@ -6,38 +6,53 @@ const App = () => {
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
 
-  // Fetch todos on component mount
+  const BASE_URL = 'https://personal-website-6pxg.onrender.com';
+
   useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
-        if (!token) {
-          // If no token, return early
-          console.log('No token found, cannot fetch todos');
+    const initializeSession = async () => {
+      let token = localStorage.getItem('jwtToken');
+
+      if (!token) {
+        try {
+          const response = await axios.get(`${BASE_URL}/new-session`);
+          token = response.data.token;
+          if (token) {
+            localStorage.setItem('jwtToken', token);
+          } else {
+            console.error('Token missing from /new-session response');
+            return;
+          }
+        } catch (error) {
+          console.error('Error creating session:', error);
           return;
         }
-
-        const response = await axios.get('https://personal-website-6pxg.onrender.com/todos', {
-          headers: {
-            Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
-          },
-        });
-        
-        const sortedTodos = response.data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-        setTodos(sortedTodos);
-      } catch (error) {
-        console.error('Error fetching todos', error);
       }
+
+      fetchTodos(token);
     };
 
-    fetchTodos();
+    initializeSession();
   }, []);
 
-  // Add new todo
+  const fetchTodos = async (token) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/todos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const sortedTodos = response.data.sort(
+        (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+      );
+      setTodos(sortedTodos);
+    } catch (error) {
+      console.error('Error fetching todos', error);
+    }
+  };
+
   const addTodo = () => {
     if (!task.trim() || !dueDate) return;
 
-    const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
       console.log('No token found, cannot add todo');
       return;
@@ -45,18 +60,16 @@ const App = () => {
 
     axios
       .post(
-        'https://personal-website-6pxg.onrender.com/todos',
+        `${BASE_URL}/todos`,
         { task, dueDate },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((response) => {
         setTodos((prevTodos) => {
           const updatedTodos = [...prevTodos, response.data];
-          return updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+          return updatedTodos.sort(
+            (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+          );
         });
       })
       .catch((error) => console.error('Error adding todo', error));
@@ -65,23 +78,22 @@ const App = () => {
     setDueDate('');
   };
 
-  // Delete a todo
   const deleteTodo = (id) => {
-    const token = localStorage.getItem('jwtToken'); // Get the JWT token from local storage
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
       console.log('No token found, cannot delete todo');
       return;
     }
 
     axios
-      .delete(`https://personal-website-6pxg.onrender.com/todos/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Send the JWT token in the Authorization header
-        },
+      .delete(`${BASE_URL}/todos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
         const updatedTodos = todos.filter((todo) => todo._id !== id);
-        updatedTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+        updatedTodos.sort(
+          (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+        );
         setTodos(updatedTodos);
       })
       .catch((error) => console.error('Error deleting todo', error));
