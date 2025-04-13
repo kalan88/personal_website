@@ -6,7 +6,7 @@ const App = () => {
   const [task, setTask] = useState('');
   const [dueDate, setDueDate] = useState('');
 
-  const BASE_URL = 'https://personal-website-6pxg.onrender.com';
+  const BASE_URL = 'https://kalan88backend.netlify.app/.netlify/functions'; // Updated base URL
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -106,7 +106,6 @@ const App = () => {
     // This keeps the date in UTC and just returns the date in ISO format
     return new Date(date).toISOString().slice(0, 10);  // "YYYY-MM-DD" format
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-800 text-amber-400 flex items-start justify-center space-x-8 p-8">
