@@ -150,7 +150,7 @@ const App = () => {
               className="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center"
             >
               <div className="flex space-x-4 items-center">
-                <span className="text-xl text-amber-300">{todo.task}</span>
+                <span className="text-xl text-amber-300 font-serif">{todo.task}</span>
                 <span className="ml-3 text-gray-400 text-sm font-serif">
                   Due: {formatDueDate(todo.dueDate)} {/* Display local time */}
                 </span>
