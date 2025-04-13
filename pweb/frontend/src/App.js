@@ -172,12 +172,17 @@ const App = () => {
 
 const formatDueDate = (date) => {
   const localDate = new Date(date);  // Convert UTC string to Date object
+
+  // Set the time to 12:00 PM (noon) UTC
+  localDate.setUTCHours(12, 0, 0, 0);  // Set hour to 12, minutes, seconds, and milliseconds to 0
+
   const year = localDate.getUTCFullYear();  // Get the UTC year
   const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');  // Get the UTC month (0-indexed)
-  const day = String(localDate.getUTCDate()).padStart(2, '0');  // Get the UTC date
-  
+  const day = String(localDate.getUTCDate()).padStart(2, '0');  // Get the UTC day
+
   return `${year}-${month}-${day}`;  // Format the date as 'YYYY-MM-DD'
 };
+
 
 
 
