@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const allowedOrigins = ['https://kalan88.netlify.app']; // ✅ whitelist your frontend URL
+const allowedOrigins = ['https://kalan88.netlify.app']; // 
 
 exports.handler = async function (event) {
   const origin = event.headers.origin;

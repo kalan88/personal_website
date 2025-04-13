@@ -1,4 +1,4 @@
-const connectToDatabase = require('../../utils/mongo'); // adjust path if needed
+const connectToDatabase = require('../mongo.js'); // adjust path if needed
 const jwt = require('jsonwebtoken');
 
 const allowedOrigins = ['https://kalan88.netlify.app']; 
