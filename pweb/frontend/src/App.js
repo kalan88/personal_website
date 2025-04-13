@@ -152,7 +152,7 @@ const App = () => {
               <div className="flex space-x-4 items-center">
                 <span className="text-xl text-amber-300">{todo.task}</span>
                 <span className="ml-3 text-gray-400 text-sm">
-                  Due: {formatDueDate(todo.dueDate)}
+                  Due: {todo.dueDate}
                 </span>
               </div>
 
