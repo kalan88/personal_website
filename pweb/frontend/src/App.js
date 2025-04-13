@@ -102,11 +102,11 @@ const App = () => {
       .catch((error) => console.error('Error deleting todo', error));
   };
 
-  // Adjust the date to the local time zone for display
   const formatDueDate = (date) => {
-    const localDate = new Date(date);  // Convert the UTC date to local time
-    return localDate.toLocaleDateString();  // Adjust to local time zone and return the formatted date string
+    // This keeps the date in UTC and just returns the date in ISO format
+    return new Date(date).toISOString().slice(0, 10);  // "YYYY-MM-DD" format
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-800 text-amber-400 flex items-start justify-center space-x-8 p-8">
