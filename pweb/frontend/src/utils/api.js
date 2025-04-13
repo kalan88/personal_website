@@ -1,4 +1,4 @@
-const API_URL = 'https://personal-website-6pxg.onrender.com/api/todos';
+const API_URL = 'https://personal-website-6pxg.onrender.com/todos';
 
 export const getTodos = async () => {
   const response = await fetch(API_URL);
