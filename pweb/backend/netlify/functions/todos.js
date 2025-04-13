@@ -16,13 +16,11 @@ const TodoSchema = new mongoose.Schema({
   dueDate: { type: Date, required: true },
 });
 
-//hello
-
 const Todo = mongoose.model('Todo', TodoSchema);
 
 // Define a handler for the to-do API
 exports.handler = async function (event, context) {
-  const { httpMethod, path, body, queryStringParameters } = event;
+  const { httpMethod, path, body } = event;
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -96,8 +94,24 @@ exports.handler = async function (event, context) {
   // Handle DELETE request to remove a todo
   if (httpMethod === 'DELETE' && path.startsWith('/todos/')) {
     const todoId = path.split('/')[2];  // Extract todo ID from URL
+    if (!todoId) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ message: 'Todo ID is required' }),
+      };
+    }
+
     try {
-      await Todo.findByIdAndDelete(todoId);
+      const deletedTodo = await Todo.findByIdAndDelete(todoId);
+      if (!deletedTodo) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Todo not found' }),
+        };
+      }
+
       return {
         statusCode: 200,
         headers,
