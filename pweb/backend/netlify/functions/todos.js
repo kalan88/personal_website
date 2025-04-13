@@ -1,131 +1,104 @@
-// netlify/functions/todos.js
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const connectToDatabase = require('../../utils/mongo'); // adjust path if needed
 const jwt = require('jsonwebtoken');
 
-dotenv.config();
+const allowedOrigins = ['https://kalan88.netlify.app']; 
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log(err));
+module.exports.handler = async (event) => {
+  const origin = event.headers.origin;
 
-// Create a Todo Schema
-const TodoSchema = new mongoose.Schema({
-  task: String,
-  completed: Boolean,
-  dueDate: { type: Date, required: true },
-  userId: { type: String, required: true }, // Associate each to-do with a user
-});
-
-const Todo = mongoose.model('Todo', TodoSchema);
-
-// Middleware to authenticate using JWT
-const authenticateToken = (token) => {
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    throw new Error('Invalid token');
+  // Handle preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      },
+      body: 'Preflight OK',
+    };
   }
-};
 
-// Main handler
-exports.handler = async (event, context) => {
-  const method = event.httpMethod;
+  const headers = {
+    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  };
 
-  if (method === 'GET') {
-    // Handle GET request to fetch todos
-    const token = event.headers.authorization && event.headers.authorization.split(' ')[1];
-    if (!token) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ message: 'Access denied, no token provided' }),
-      };
-    }
+  // 🔐 JWT authentication check
+  const token = event.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({ error: 'Missing Authorization header' }),
+    };
+  }
 
-    const user = authenticateToken(token);
-    try {
-      const todos = await Todo.find({ userId: user.userId }).sort({ dueDate: 1 });
+  let userId;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    userId = decoded.userId;
+  } catch (error) {
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({ error: 'Invalid token' }),
+    };
+  }
+
+  try {
+    const db = await connectToDatabase();
+    const collection = db.collection('todos');
+
+    if (event.httpMethod === 'GET') {
+      const todos = await collection.find({ userId }).toArray();
       return {
         statusCode: 200,
+        headers,
         body: JSON.stringify(todos),
       };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ message: 'Error fetching todos', error }),
-      };
-    }
-  }
-
-  if (method === 'POST') {
-    // Handle POST request to add a todo
-    const token = event.headers.authorization && event.headers.authorization.split(' ')[1];
-    if (!token) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ message: 'Access denied, no token provided' }),
-      };
     }
 
-    const user = authenticateToken(token);
-    const { task, dueDate } = JSON.parse(event.body);
-    if (!task || !dueDate) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Task and due date are required' }),
-      };
-    }
-
-    const dueDateUTC = new Date(dueDate).toISOString();
-
-    try {
-      const newTodo = new Todo({
-        task,
-        completed: false,
-        dueDate: dueDateUTC,
-        userId: user.userId,
-      });
-
-      await newTodo.save();
+    if (event.httpMethod === 'POST') {
+      const { task, dueDate } = JSON.parse(event.body);
+      const result = await collection.insertOne({ task, dueDate, userId });
       return {
         statusCode: 200,
-        body: JSON.stringify(newTodo),
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ message: 'Error saving todo', error }),
-      };
-    }
-  }
-
-  if (method === 'DELETE') {
-    // Handle DELETE request to remove a todo
-    const token = event.headers.authorization && event.headers.authorization.split(' ')[1];
-    if (!token) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ message: 'Access denied, no token provided' }),
+        headers,
+        body: JSON.stringify(result.ops[0]),
       };
     }
 
-    const user = authenticateToken(token);
-    const { id } = event.queryStringParameters;
+    if (event.httpMethod === 'DELETE') {
+      const id = event.queryStringParameters?.id;
+      if (!id) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Missing ID' }),
+        };
+      }
 
-    try {
-      await Todo.findOneAndDelete({ _id: id, userId: user.userId });
+      const { ObjectId } = require('mongodb');
+      await collection.deleteOne({ _id: new ObjectId(id), userId });
       return {
         statusCode: 200,
-        body: JSON.stringify({ message: 'Todo deleted' }),
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ message: 'Error deleting todo', error }),
+        headers,
+        body: JSON.stringify({ message: 'Deleted' }),
       };
     }
-  }
 
-  return { statusCode: 405, body: 'Method Not Allowed' };
+    return {
+      statusCode: 405,
+      headers,
+      body: 'Method Not Allowed',
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
 };
