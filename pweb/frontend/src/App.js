@@ -58,7 +58,7 @@ const App = () => {
       return;
     }
 
-    // Convert the dueDate to ISO format before sending to backend (UTC)
+    // Convert the dueDate to UTC before sending to backend (to avoid time zone discrepancies)
     const dueDateISO = new Date(dueDate).toISOString();  // Convert to UTC before sending to the backend
 
     axios
