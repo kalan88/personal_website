@@ -1,12 +1,7 @@
 [build]
-  # Directory where Netlify should look for the build output
-  publish = "build"
-  
-  # Directory where Netlify should look for serverless functions (backend)
-  functions = "netlify-functions"
-
-  # Command to build the site
-  command = "npm run build"
+  base = "pweb/backend"  
+  command = "echo 'No build step required'"  
+  publish = "pweb/backend"  
 
 [dev]
   # Enable live reload during development
