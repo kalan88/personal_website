@@ -178,7 +178,7 @@ const formatDueDate = (date) => {
 
   const year = localDate.getUTCFullYear();  // Get the UTC year
   const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');  // Get the UTC month (0-indexed)
-  const day = String(localDate.getUTCDate()).padStart(2, '0');  // Get the UTC day
+  const day = String(localDate.getUTCDate() + 1).padStart(2, '0');  // Get the UTC day
 
   return `${year}-${month}-${day}`;  // Format the date as 'YYYY-MM-DD'
 };
