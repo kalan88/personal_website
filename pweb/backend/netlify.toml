@@ -1,7 +1,7 @@
 [build]
   base = "pweb/backend"  
   command = "echo 'No build step required'"  
-  publish = "pweb/backend"  
+  publish = "."  
 
 [dev]
   # Enable live reload during development
