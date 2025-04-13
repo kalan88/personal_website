@@ -51,7 +51,7 @@ const App = () => {
 
   const deleteTodo = (id) => {
     axios
-      .delete(`${BASE_URL}/todos?id=${id}`)
+      .delete(`${BASE_URL}/todos/${id}`)  // Pass the todoId in the URL path
       .then(() => {
         const updatedTodos = todos.filter((todo) => todo._id !== id);
         updatedTodos.sort(
@@ -61,6 +61,7 @@ const App = () => {
       })
       .catch((error) => console.error('Error deleting todo', error));
   };
+  
 
   const formatDueDate = (date) => {
     return new Date(date).toISOString().slice(0, 10);
