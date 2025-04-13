@@ -158,7 +158,7 @@ const App = () => {
 
               <button
                 onClick={() => deleteTodo(todo._id)}
-                className="text-red-500 text-xl hover:text-red-400"
+                className="w-15 bg-amber-400 text-gray-800 p-2 rounded font-bold font-serif hover:bg-amber-500 transition-all"
               >
                 Delete
               </button>
