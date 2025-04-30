@@ -2,14 +2,14 @@ const mongoose = require('mongoose');
 const { Handler } = require('@netlify/functions');
 const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config(); // Load environment variables
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log(err));
+  .catch(err => console.log('MongoDB connection error:', err));
 
-// Create a Todo Schema
+// Todo Schema Definition
 const TodoSchema = new mongoose.Schema({
   task: String,
   completed: Boolean,
@@ -18,12 +18,12 @@ const TodoSchema = new mongoose.Schema({
 
 const Todo = mongoose.model('Todo', TodoSchema);
 
-// Define a handler for the to-do API
+// Netlify Function Handler
 exports.handler = async function (event, context) {
   const { httpMethod, path, body } = event;
   const headers = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': '*',  // Allow cross-origin requests
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS',
   };
@@ -37,11 +37,10 @@ exports.handler = async function (event, context) {
     };
   }
 
+  // Handle GET request to fetch todos
   if (httpMethod === 'GET' && path === '/.netlify/functions/todos') {
-    console.log("Received GET request for todos");
     try {
       const todos = await Todo.find().sort({ dueDate: 1 });
-      console.log("Fetched todos:", todos);
       return {
         statusCode: 200,
         headers,
@@ -56,12 +55,12 @@ exports.handler = async function (event, context) {
       };
     }
   }
-  
 
   // Handle POST request to create a new todo
   if (httpMethod === 'POST' && path === '/.netlify/functions/todos') {
     try {
       const { task, dueDate } = JSON.parse(body);
+
       if (!task || !dueDate) {
         return {
           statusCode: 400,
@@ -70,7 +69,7 @@ exports.handler = async function (event, context) {
         };
       }
 
-      const dueDateUTC = new Date(dueDate).toISOString();  // Convert to UTC
+      const dueDateUTC = new Date(dueDate).toISOString(); // Convert to UTC
 
       const newTodo = new Todo({
         task,
@@ -86,6 +85,7 @@ exports.handler = async function (event, context) {
         body: JSON.stringify(newTodo),
       };
     } catch (error) {
+      console.error('Error saving todo:', error);
       return {
         statusCode: 500,
         headers,
@@ -95,44 +95,43 @@ exports.handler = async function (event, context) {
   }
 
   // Handle DELETE request to remove a todo
-if (httpMethod === 'DELETE' && path.startsWith('/.netlify/functions/todos/')) {
-  // Extract todoId from the URL path
-  const todoId = path.split('/').pop();  // This will give you the last part after 'todos/'
+  if (httpMethod === 'DELETE' && path.startsWith('/.netlify/functions/todos/')) {
+    const todoId = path.split('/').pop();
 
-  if (!todoId) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ message: 'Todo ID is required' }),
-    };
-  }
-
-  try {
-    const deletedTodo = await Todo.findByIdAndDelete(todoId);
-    if (!deletedTodo) {
+    if (!todoId) {
       return {
-        statusCode: 404,
+        statusCode: 400,
         headers,
-        body: JSON.stringify({ message: 'Todo not found' }),
+        body: JSON.stringify({ message: 'Todo ID is required' }),
       };
     }
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ message: 'Todo deleted' }),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ message: 'Error deleting todo', error }),
-    };
+    try {
+      const deletedTodo = await Todo.findByIdAndDelete(todoId);
+      if (!deletedTodo) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Todo not found' }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: 'Todo deleted' }),
+      };
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ message: 'Error deleting todo', error }),
+      };
+    }
   }
-}
 
-
-  // Return error for unsupported HTTP methods
+  // Handle unsupported methods
   return {
     statusCode: 405,
     headers,
